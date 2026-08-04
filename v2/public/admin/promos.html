@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>أكواد البروموكود — Club 54 Food</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: #071A0F;
+      color: #f0f0f0;
+      min-height: 100vh;
+      padding: 32px 16px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+    header h1 { font-size: 1.6rem; color: #F4C430; flex: 1; }
+    .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    header a {
+      color: #aaa;
+      text-decoration: none;
+      font-size: 0.85rem;
+      border: 1px solid #333;
+      padding: 7px 16px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    header a:hover { border-color: #F4C430; color: #F4C430; }
+    .btn-generate {
+      background: rgba(244,196,48,0.15);
+      border: 1px solid rgba(244,196,48,0.45);
+      color: #F4C430;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 7px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .btn-generate:hover { background: rgba(244,196,48,0.28); }
+    .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; }
+    .stats {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .stat {
+      background: #0D2E1C;
+      border: 1px solid rgba(244,196,48,0.18);
+      border-radius: 10px;
+      padding: 16px 24px;
+      text-align: center;
+      min-width: 120px;
+    }
+    .stat .num { font-size: 2rem; font-weight: 700; color: #F4C430; }
+    .stat .label { font-size: 0.78rem; color: #888; margin-top: 4px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #0D2E1C;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    thead { background: #1a4a2a; }
+    th {
+      padding: 14px 18px;
+      text-align: right;
+      font-size: 0.8rem;
+      color: #F4C430;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid rgba(244,196,48,0.18);
+    }
+    td {
+      padding: 14px 18px;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(244,196,48,0.04); }
+    .code {
+      font-family: 'Courier New', monospace;
+      font-size: 0.95rem;
+      color: #fff;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+    .badge-discount {
+      display: inline-block;
+      background: rgba(244,196,48,0.12);
+      color: #F4C430;
+      border: 1px solid rgba(244,196,48,0.3);
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+    .badge-available {
+      display: inline-block;
+      background: rgba(34,197,94,0.12);
+      color: #22c55e;
+      border: 1px solid rgba(34,197,94,0.3);
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 0.82rem;
+    }
+    .badge-used {
+      display: inline-block;
+      background: rgba(239,68,68,0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239,68,68,0.25);
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 0.82rem;
+    }
+    .copy-btn {
+      background: none;
+      border: 1px solid #333;
+      color: #aaa;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover { border-color: #F4C430; color: #F4C430; }
+    .copy-btn.copied { border-color: #22c55e; color: #22c55e; }
+    .del-btn {
+      background: none;
+      border: 1px solid rgba(239,68,68,0.3);
+      color: rgba(239,68,68,0.6);
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+      margin-right: 4px;
+    }
+    .del-btn:hover { border-color: #ef4444; color: #ef4444; }
+    .used-at { color: #666; font-size: 0.8rem; }
+    .loading { text-align: center; padding: 60px; color: #555; }
+    .error { text-align: center; padding: 40px; color: #ef4444; }
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #0D2E1C; border: 1px solid rgba(244,196,48,0.4); border-radius: 8px;
+      color: #F4C430; padding: 12px 22px; font-size: 0.9rem; font-weight: 600;
+      z-index: 9999; pointer-events: none; white-space: nowrap;
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .toast.show { opacity: 1; }
+
+    /* Sharp corners — override every hardcoded border-radius */
+    *, *::before, *::after { border-radius: 0 !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F4C430" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;margin-left:8px"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+      أكواد البروموكود
+    </h1>
+    <div class="header-actions">
+      <button class="btn-generate" id="genBtn" onclick="generateCodes()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        توليد 15 كود جديد
+      </button>
+      <a href="/admin/" style="display:inline-flex;align-items:center;gap:6px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        لوحة الإدارة
+      </a>
+    </div>
+  </header>
+
+  <div class="stats" id="stats">
+    <div class="stat"><div class="num" id="totalCount">—</div><div class="label">إجمالي الأكواد</div></div>
+    <div class="stat"><div class="num" id="availCount">—</div><div class="label">متاحة</div></div>
+    <div class="stat"><div class="num" id="usedCount">—</div><div class="label">مستخدمة</div></div>
+  </div>
+
+  <div id="tableWrap" class="loading">جاري التحميل…</div>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    async function load() {
+      try {
+        const res = await fetch('/api/promos');
+        if (!res.ok) throw new Error('فشل التحميل');
+        const codes = await res.json();
+
+        const total = codes.length;
+        const used  = codes.filter(c => c.used).length;
+        const avail = total - used;
+
+        document.getElementById('totalCount').textContent = total;
+        document.getElementById('availCount').textContent  = avail;
+        document.getElementById('usedCount').textContent  = used;
+
+        const rows = codes.map((c, i) => `
+          <tr>
+            <td style="color:#555;font-size:0.8rem">${i + 1}</td>
+            <td><span class="code" id="code-${i}">${c.code}</span></td>
+            <td><span class="badge-discount">${c.discount}%</span></td>
+            <td>${c.used
+              ? `<span class="badge-used">مستخدم</span>`
+              : `<span class="badge-available">متاح</span>`}
+            </td>
+            <td class="used-at">${c.usedAt ? new Date(c.usedAt).toLocaleString('ar-DZ') : '—'}</td>
+            <td>
+              <button class="del-btn" onclick="deleteCode('${c.code}', this)">حذف</button>
+              <button class="copy-btn" onclick="copyCode('${c.code}', this)">نسخ</button>
+            </td>
+          </tr>
+        `).join('');
+
+        document.getElementById('tableWrap').innerHTML = rows.length
+          ? `<table>
+              <thead>
+                <tr>
+                  <th>#</th><th>الكود</th><th>الخصم</th><th>الحالة</th>
+                  <th>تاريخ الاستخدام</th><th></th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>`
+          : '<div class="loading">لا توجد أكواد — اضغط "توليد" لإنشاء أكواد جديدة</div>';
+      } catch (e) {
+        document.getElementById('tableWrap').innerHTML =
+          `<div class="error">خطأ في التحميل: ${e.message}</div>`;
+      }
+    }
+
+    async function generateCodes() {
+      const btn = document.getElementById('genBtn');
+      btn.disabled = true;
+      btn.textContent = 'جاري التوليد…';
+      try {
+        const res  = await fetch('/api/promos/generate', { method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ count: 15 }) });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || 'فشل التوليد');
+        showToast(`تم توليد ${data.generated} كود جديد`);
+        await load();
+      } catch (e) {
+        showToast('خطأ: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> توليد 15 كود جديد';
+      }
+    }
+
+    async function deleteCode(code, btn) {
+      if (!confirm(`حذف الكود "${code}"؟`)) return;
+      btn.disabled = true;
+      try {
+        await fetch(`/api/promos/${encodeURIComponent(code)}`, { method: 'DELETE' });
+        showToast('تم الحذف');
+        await load();
+      } catch (e) {
+        showToast('فشل الحذف');
+        btn.disabled = false;
+      }
+    }
+
+    function copyCode(code, btn) {
+      navigator.clipboard.writeText(code).then(() => {
+        btn.textContent = 'تم النسخ';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'نسخ'; btn.classList.remove('copied'); }, 2000);
+      });
+    }
+
+    let _toastTimer = null;
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(_toastTimer);
+      _toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    load();
+  </script>
+</body>
+</html>
