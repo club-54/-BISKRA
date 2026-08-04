@@ -99,7 +99,7 @@ window.fetch = async function(url, opts = {}) {
 
     // ── /api/promos ────────────────────────────────────────────────────────
     if (url === '/api/promos' && method === 'GET') {
-      return ok(d.promos);
+      return ok(await API.getPromos());
     }
     if (url === '/api/promos/generate' && method === 'POST') {
       const count = Math.min(parseInt(body?.count) || 15, 50);

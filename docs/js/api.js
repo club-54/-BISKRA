@@ -88,25 +88,39 @@ const API = (() => {
     return fetch(CONFIG.BASE + '/data/gallery.json').then(r => r.json()).catch(() => []);
   }
 
+  // ── Promos: JSONBin first, static fallback ────────────────────────────────
+  async function getPromos() {
+    const raw = await _get();
+    const d   = _defaults(raw);
+    if (d.promos.length) return d.promos;
+    return fetch(CONFIG.BASE + '/data/promo-codes.json').then(r => r.json()).catch(() => []);
+  }
+
   async function validatePromo(code) {
-    const raw   = await _get();
-    const d     = _defaults(raw);
-    const promo = d.promos.find(p => p.code === code);
+    const promos = await getPromos();
+    const promo  = promos.find(p => p.code === code);
     if (!promo)     return { valid: false, error: 'الكود غير موجود' };
     if (promo.used) return { valid: false, error: 'الكود مستخدم مسبقاً' };
     return { valid: true, discount: promo.discount };
   }
 
   async function redeemPromo(code) {
-    const raw = await _get(true); // fresh
-    const d   = _defaults(raw);
-    const idx = d.promos.findIndex(p => p.code === code);
-    if (idx === -1 || d.promos[idx].used) return { ok: false };
-    d.promos[idx].used   = true;
-    d.promos[idx].usedAt = new Date().toISOString();
-    const full = { ...(raw || {}), ...d };
-    await _save(full);
-    return { ok: true, discount: d.promos[idx].discount };
+    const raw    = await _get(true); // fresh
+    const d      = _defaults(raw);
+    // If JSONBin not configured, use static file but can't persist
+    const promos = d.promos.length ? d.promos
+      : await fetch(CONFIG.BASE + '/data/promo-codes.json').then(r => r.json()).catch(() => []);
+    const idx = promos.findIndex(p => p.code === code);
+    if (idx === -1 || promos[idx].used) return { ok: false };
+    const discount = promos[idx].discount;
+    // Only persist if JSONBin is configured
+    if (CONFIG.JSONBIN_KEY && CONFIG.JSONBIN_BIN_ID) {
+      promos[idx].used   = true;
+      promos[idx].usedAt = new Date().toISOString();
+      const full = { ...(raw || {}), ...d, promos };
+      await _save(full);
+    }
+    return { ok: true, discount };
   }
 
   async function submitOrder({ name, phone, address, gps, cart, total, promo }) {
@@ -132,5 +146,5 @@ const API = (() => {
 
   // Expose internals for admin-shim
   return { getMenu, getBaseMenu, getSupplements, getJuices, getGallery,
-           validatePromo, redeemPromo, submitOrder, _get, _save, _defaults };
+           getPromos, validatePromo, redeemPromo, submitOrder, _get, _save, _defaults };
 })();
