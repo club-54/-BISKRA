@@ -123,7 +123,7 @@ window.fetch = async function(url, opts = {}) {
 
     // ── /api/supplements ───────────────────────────────────────────────────
     if (url === '/api/supplements' && method === 'GET') {
-      return ok(d.supplements);
+      return ok(await API.getSupplements());
     }
     if (url === '/api/supplements' && method === 'POST') {
       const item = { ...body, id: body.id || `sup-${Date.now()}` };
@@ -148,7 +148,7 @@ window.fetch = async function(url, opts = {}) {
 
     // ── /api/juices ────────────────────────────────────────────────────────
     if (url === '/api/juices' && method === 'GET') {
-      return ok(d.juices);
+      return ok(await API.getJuices());
     }
     if (url === '/api/juices/carousel' && method === 'POST') {
       const item = { ...body, id: body.id || `jus-${Date.now()}` };
@@ -193,7 +193,7 @@ window.fetch = async function(url, opts = {}) {
 
     // ── /api/gallery ───────────────────────────────────────────────────────
     if (url === '/api/gallery' && method === 'GET') {
-      return ok(d.gallery);
+      return ok(await API.getGallery());
     }
     if (url === '/api/gallery/image' && method === 'POST') {
       const item = { id: `gallery-${Date.now()}`, url: body.url, label: body.label || '', desc: body.desc || '' };
