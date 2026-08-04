@@ -2182,5 +2182,38 @@ body::before {
   .reveal { opacity: 1; transform: none; }
 }
 
+/* ── Developer credit ── */
+.footer-dev {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 0 4px;
+  font-size: 11px;
+  letter-spacing: .08em;
+  color: rgba(255,255,255,.28);
+  text-transform: uppercase;
+}
+.footer-dev-name {
+  color: rgba(255,255,255,.45);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color .2s;
+}
+.footer-dev-name:hover { color: var(--gold); }
+.footer-dev-logo {
+  display: inline-flex;
+  align-items: center;
+  opacity: .55;
+  transition: opacity .2s;
+}
+.footer-dev-logo:hover { opacity: 1; }
+.footer-dev-logo img {
+  height: 26px;
+  width: 26px;
+  object-fit: cover;
+  display: block;
+}
+
 /* Sharp corners — absolute brand rule, always last. */
 *, *::before, *::after { border-radius: 0 !important; }
