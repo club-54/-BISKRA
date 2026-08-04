@@ -109,6 +109,12 @@ function renderCategories() {
 }
 
 function setCategory(catId) {
+  // Special case: 'jus' category scrolls to the dedicated juice carousel section
+  if (catId === 'jus') {
+    $$('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === catId));
+    document.getElementById('juice-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return;
+  }
   state.activeCategory = catId;
   $$('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === catId));
   renderMenu();
