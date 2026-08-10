@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+  <title>CLUB 54 FOOD</title>
+  <meta name="description" content="Club 54 Food — Burgers, Pizzas, Tacos & plus. Commandez maintenant." />
+  <meta name="robots" content="index, follow" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE LOADER (dismisses when menu loads)
+══════════════════════════════════════════════════════════ -->
+<div id="page-loader">
+  <div class="pl-center">
+    <img
+      src="https://res.cloudinary.com/rjse3x88/image/upload/v1784525005/club54/logo-nobg.png"
+      alt="Club 54 Food"
+      class="pl-logo"
+    />
+    <div class="pl-bar-wrap">
+      <div id="pl-bar"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     VIDEO LOADER (plays after page-loader, before content)
+══════════════════════════════════════════════════════════ -->
+<div id="video-loader">
+  <video
+    id="vl-video"
+    muted
+    playsinline
+    preload="auto"
+  >
+    <source src="https://res.cloudinary.com/dlwdjl86g/video/upload/vc_h264,q_auto/0625_zpv5tl.mp4" type="video/mp4" />
+  </video>
+  <button id="vl-skip" onclick="window.__skipVideoLoader && window.__skipVideoLoader()">
+    Skip <span class="vl-skip-arrow">&#8250;</span>
+  </button>
+</div>
+
+<script>
+(function () {
+  var loader    = document.getElementById('page-loader');
+  var bar       = document.getElementById('pl-bar');
+  var vLoader   = document.getElementById('video-loader');
+  var vEl       = document.getElementById('vl-video');
+
+  var menuReady  = false;
+  var videoReady = false;
+  var launched   = false;
+
+  // Animate bar to ~70% while waiting
+  if (bar) setTimeout(function () { bar.style.width = '70%'; }, 100);
+
+  function dismissVideoLoader() {
+    if (!vLoader) return;
+    vLoader.style.opacity = '0';
+    setTimeout(function () { if (vLoader) vLoader.remove(); }, 700);
+  }
+
+  function tryLaunch() {
+    if (launched) return;
+    if (!menuReady || !videoReady) return;
+    launched = true;
+
+    // Bar to 100% then fade out page-loader → video already loaded, plays instantly
+    if (bar) bar.style.width = '100%';
+    setTimeout(function () {
+      // Show video-loader behind page-loader
+      if (vLoader && vEl) {
+        vLoader.classList.add('vl-visible');
+        var p = vEl.play();
+        if (p !== undefined) p.catch(dismissVideoLoader);
+        vEl.addEventListener('ended', dismissVideoLoader, { once: true });
+        setTimeout(dismissVideoLoader, 15000);
+      }
+      // Fade out page-loader revealing video beneath
+      if (loader) {
+        loader.style.opacity = '0';
+        setTimeout(function () { if (loader) { loader.remove(); loader = null; } }, 650);
+      }
+    }, 200);
+  }
+
+  // Called by app.js when menu data is ready
+  window.__dismissPageLoader = function () {
+    menuReady = true;
+    tryLaunch();
+  };
+
+  // Listen for video ready
+  if (vEl) {
+    vEl.addEventListener('canplaythrough', function () {
+      videoReady = true;
+      tryLaunch();
+    }, { once: true });
+    // Start loading the video now
+    vEl.load();
+  }
+
+  // Skip button
+  window.__skipVideoLoader = dismissVideoLoader;
+
+  // Hard fallback: if video never fires canplaythrough after 7s, proceed anyway
+  setTimeout(function () {
+    videoReady = true;
+    tryLaunch();
+  }, 7000);
+
+  // Hard fallback: if menu never loads after 10s, proceed anyway
+  setTimeout(function () {
+    menuReady = true;
+    tryLaunch();
+  }, 10000);
+})();
+</script>
+
+<!-- ══════════════════════════════════════════════════════════
+     NAVBAR
+══════════════════════════════════════════════════════════ -->
+<nav id="navbar">
+  <div class="nav-brand">
+    <img
+      src="https://res.cloudinary.com/rjse3x88/image/upload/v1784525005/club54/logo-nobg.png"
+      alt="Club 54 Food"
+      class="nav-logo"
+    />
+    <span class="nav-title">CLUB 54 FOOD</span>
+  </div>
+  <div class="nav-actions">
+    <button id="cart-btn" aria-label="Ouvrir le panier">
+      <!-- Cart icon -->
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+      </svg>
+      Panier
+      <span id="cart-count" class="hidden">0</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════
+     HERO
+══════════════════════════════════════════════════════════ -->
+<section id="hero">
+  <!-- Static background image (immediate, no waiting) -->
+  <div class="hero-bg"></div>
+  <!-- Dark overlay -->
+  <div class="hero-overlay"></div>
+  <!-- Video is injected by JS as progressive enhancement -->
+
+  <div class="hero-content">
+    <div class="hero-kicker">
+      <span class="hero-kicker-rule"></span>
+      <span>BISKRA · CUISINE DE CARACTÈRE</span>
+      <span class="hero-kicker-rule"></span>
+    </div>
+
+    <div class="hero-lockup">
+      <span class="hero-lockup-word">CLUB</span>
+      <h1 class="hero-title" aria-label="Club 54 Food">54</h1>
+      <span class="hero-lockup-word">FOOD</span>
+    </div>
+
+    <div class="hero-copy">
+      <p class="hero-eyebrow">LE GOÛT NE DEMANDE PAS LA PERMISSION</p>
+      <h2 class="hero-heading">Faim de <em>grand.</em></h2>
+      <p class="hero-sub">Burgers, pizzas, tacos &amp; pasta — servis avec audace, préparés à la minute.</p>
+    </div>
+
+    <div class="hero-actions">
+      <a href="#menu" class="hero-cta hero-cta-primary">
+        <span>Explorer le menu</span>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+      <a href="#menu" class="hero-cta hero-cta-outline">Commander maintenant</a>
+    </div>
+  </div>
+
+  <div class="hero-mark" aria-hidden="true">54</div>
+  <div class="hero-meta" aria-hidden="true">
+    <span>01</span><i></i><span>LE CLUB EST SERVI</span>
+  </div>
+  <div class="hero-scroll-hint">
+    <span>Découvrir</span>
+    <div class="hero-scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     CATEGORY BAR (sticky)
+══════════════════════════════════════════════════════════ -->
+<div id="categories-bar">
+  <button class="cat-arrow cat-arrow-left" id="cat-arrow-left" aria-label="Défiler à gauche">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <div class="categories-scroll" id="categories-scroll">
+    <!-- Rendered by JS -->
+    <div id="menu-loader" style="padding:8px 20px;">
+      <div class="spinner" style="width:24px;height:24px;border-width:2px;"></div>
+    </div>
+  </div>
+  <button class="cat-arrow cat-arrow-right" id="cat-arrow-right" aria-label="Défiler à droite">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+</div>
+
+<script>
+(function() {
+  function initCatArrows() {
+    var scroll = document.getElementById('categories-scroll');
+    var btnL   = document.getElementById('cat-arrow-left');
+    var btnR   = document.getElementById('cat-arrow-right');
+    if (!scroll || !btnL || !btnR) return;
+
+    var STEP = 200;
+
+    function update() {
+      var atStart = scroll.scrollLeft <= 4;
+      var atEnd   = scroll.scrollLeft + scroll.clientWidth >= scroll.scrollWidth - 4;
+      btnL.classList.toggle('cat-arrow-hidden', atStart);
+      btnR.classList.toggle('cat-arrow-hidden', atEnd);
+    }
+
+    btnL.addEventListener('click', function() {
+      scroll.scrollBy({ left: -STEP, behavior: 'smooth' });
+    });
+    btnR.addEventListener('click', function() {
+      scroll.scrollBy({ left: STEP, behavior: 'smooth' });
+    });
+
+    scroll.addEventListener('scroll', update, { passive: true });
+    // Re-check after categories are injected by app.js
+    var mo = new MutationObserver(update);
+    mo.observe(scroll, { childList: true });
+    update();
+  }
+  // Run after DOM ready (this script is inline, DOM not yet complete)
+  document.addEventListener('DOMContentLoaded', initCatArrows);
+})();
+</script>
+
+<!-- ══════════════════════════════════════════════════════════
+     MENU SECTION
+══════════════════════════════════════════════════════════ -->
+<main id="menu">
+  <div class="menu-container">
+    <!-- Menu loader (replaced by JS after fetch) -->
+    <div id="menu-list">
+      <div id="menu-loader" style="display:flex;justify-content:center;padding:80px 0;">
+        <div class="spinner"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supplements section -->
+  <div class="menu-container">
+    <section id="supplements-section">
+      <div class="section-header">
+        <h2>Suppléments</h2>
+        <p>AJOUTEZ À VOTRE COMMANDE</p>
+      </div>
+      <div class="sup-grid" id="sup-grid">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ══════════════════════════════════════════════════════════
+     JUICE 3D CAROUSEL
+══════════════════════════════════════════════════════════ -->
+<section id="juice-section">
+  <div class="juice-header">
+    <h2>Boissons &amp; Jus</h2>
+    <p class="ar">مشروبات وعصائر طازجة</p>
+  </div>
+
+  <!-- 3D Carousel -->
+  <div class="juice-carousel-wrap">
+    <div class="juice-stage" id="juice-stage">
+      <!-- Cards injected by JS -->
+    </div>
+    <div class="juice-nav">
+      <button class="juice-nav-btn" id="juice-prev" aria-label="Précédent">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="juice-dots" id="juice-dots"></div>
+      <button class="juice-nav-btn" id="juice-next" aria-label="Suivant">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Simple drinks list -->
+  <div class="juice-simple-wrap" id="juice-simple-wrap">
+    <!-- Injected by JS -->
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     GALLERY SECTION
+══════════════════════════════════════════════════════════ -->
+<section id="gallery">
+  <div class="gallery-header">
+    <div class="gallery-badge">GALERIE</div>
+    <h2 class="gallery-title">NOS PLATS EN IMAGES</h2>
+    <p class="gallery-sub">معرض صورنا</p>
+  </div>
+
+  <div class="gallery-grid" id="gallery-grid">
+    <!-- Loaded dynamically from /api/gallery -->
+  </div>
+</section>
+
+<script>
+(async function loadGallery() {
+  try {
+    const items = await fetch('/api/gallery').then(r => r.json());
+    const grid  = document.getElementById('gallery-grid');
+    if (!grid || !items.length) return;
+    grid.innerHTML = items.map((item, i) => `
+      <div class="gallery-item${i === 0 ? ' gallery-item--big' : ''}" data-index="${i}">
+        <img src="${item.url}" alt="${item.label}" loading="lazy" />
+        <div class="gallery-overlay">
+          <div class="gallery-label">${item.label}</div>
+          ${item.desc ? `<div class="gallery-desc">${item.desc}</div>` : ''}
+        </div>
+      </div>`).join('');
+    // Re-bind lightbox clicks after dynamic render
+    if (typeof bindGalleryLightbox === 'function') bindGalleryLightbox();
+  } catch (e) {
+    console.warn('Gallery load failed:', e);
+  }
+})();
+</script>
+
+<!-- Lightbox -->
+<div class="gallery-lightbox" id="galleryLightbox">
+  <button class="gallery-lb-close" id="galleryLbClose">✕</button>
+  <button class="gallery-lb-prev" id="galleryLbPrev">&#8249;</button>
+  <button class="gallery-lb-next" id="galleryLbNext">&#8250;</button>
+  <div class="gallery-lb-img-wrap">
+    <img id="galleryLbImg" src="" alt="" />
+    <div class="gallery-lb-label" id="galleryLbLabel"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     ABOUT SECTION
+══════════════════════════════════════════════════════════ -->
+<section id="about">
+  <div class="about-img-wrap">
+    <img
+      src="https://res.cloudinary.com/rjse3x88/image/upload/v1784662190/club54/about-bg.png"
+      alt="Club 54 Interior"
+      class="about-img"
+      onerror="this.closest('.about-img-wrap').style.display='none'"
+    />
+    <div class="about-overlay"></div>
+  </div>
+  <div class="about-content">
+    <div class="about-badge">À PROPOS</div>
+    <h2 class="about-title">CLUB 54 FOOD</h2>
+    <p class="about-desc">
+      Une expérience culinaire unique au cœur de Biskra.<br/>
+      Burgers, Pizzas, Tacos &amp; Pasta — préparés avec passion,<br/>
+      livrés directement chez vous.
+    </p>
+    <p class="about-desc ar" style="direction:rtl;font-size:14px;color:rgba(255,255,255,0.45);margin-top:10px;">
+      تجربة فريدة في قلب بسكرة — وجبات شهية، توصيل سريع
+    </p>
+    <a href="https://maps.app.goo.gl/xZ7Rqv5ohbdmcTWX6" target="_blank" rel="noopener" class="about-map-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+      Voir sur la carte
+    </a>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════════════════════ -->
+<footer id="footer">
+  <div class="footer-inner">
+
+    <!-- Brand -->
+    <div class="footer-brand">
+      <img
+        src="https://res.cloudinary.com/rjse3x88/image/upload/v1784525005/club54/logo-footer.png"
+        alt="Club 54 Food"
+        class="footer-logo"
+        onerror="this.style.display='none'"
+      />
+      <p class="footer-title">CLUB 54 FOOD</p>
+      <p class="footer-tagline ar">أكل بنين · توصيل سريع · بسكرة</p>
+    </div>
+
+    <!-- Divider -->
+    <div class="footer-divider"></div>
+
+    <!-- Social -->
+    <div class="footer-social-section">
+      <p class="footer-section-label">تابعونا</p>
+      <div class="footer-socials">
+
+        <a href="https://www.instagram.com/club54_food/" target="_blank" rel="noopener" class="social-btn instagram" aria-label="Instagram">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+            <circle cx="12" cy="12" r="4.5"/>
+            <circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" stroke="none"/>
+          </svg>
+          <span>Instagram</span>
+        </a>
+
+        <a href="https://web.facebook.com/54club54/" target="_blank" rel="noopener" class="social-btn facebook" aria-label="Facebook">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+          </svg>
+          <span>Facebook</span>
+        </a>
+
+        <a href="https://www.tiktok.com/@club54_food" target="_blank" rel="noopener" class="social-btn tiktok" aria-label="TikTok">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/>
+          </svg>
+          <span>TikTok</span>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="footer-divider"></div>
+
+    <!-- Hours + Contact -->
+    <div class="footer-info-section">
+      <p class="footer-section-label">ساعات العمل</p>
+      <div class="footer-hours">
+        <div class="footer-hours-row">
+          <span class="footer-hours-days">السبت — الخميس</span>
+          <span class="footer-hours-time">11:00 – 23:00</span>
+        </div>
+        <div class="footer-hours-row">
+          <span class="footer-hours-days">الجمعة</span>
+          <span class="footer-hours-time">16:00 – 23:00</span>
+        </div>
+      </div>
+      <a href="tel:+213656405454" class="footer-phone">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.78a16 16 0 0 0 6.29 6.29l.86-.86a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.73 2.06z"/></svg>
+        0656 40 54 54
+      </a>
+    </div>
+
+    <div class="footer-divider"></div>
+
+    <!-- Location + copyright -->
+    <div class="footer-bottom">
+      <a href="https://maps.app.goo.gl/xZ7Rqv5ohbdmcTWX6" target="_blank" rel="noopener" class="footer-location">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+        حي الضلعة، بسكرة وسط — عرض الموقع
+      </a>
+      <p class="footer-copy">© 2026 Club 54 Food · جميع الحقوق محفوظة</p>
+    </div>
+
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════════════════════════
+     CART OVERLAY + SIDEBAR
+══════════════════════════════════════════════════════════ -->
+<div id="cart-overlay"></div>
+
+<aside id="cart-sidebar" aria-label="Panier">
+  <div class="cart-header">
+    <h2>
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-left:6px"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      Votre Commande
+    </h2>
+    <button id="cart-close-btn" class="cart-close-btn" aria-label="Fermer">✕</button>
+  </div>
+
+  <div class="cart-items" id="cart-items-list">
+    <!-- Rendered by JS -->
+  </div>
+
+  <div class="cart-footer">
+    <!-- Subtotal -->
+    <div class="cart-line">
+      <span>Sous-total</span>
+      <span id="cart-subtotal">0 DA</span>
+    </div>
+
+    <!-- Promo saving (hidden when no promo) -->
+    <div class="cart-line" id="cart-saving-row" style="display:none;">
+      <span>Réduction promo</span>
+      <span id="cart-saving" class="promo-saving"></span>
+    </div>
+
+    <!-- Total -->
+    <div class="cart-line" style="margin-top:6px;padding-top:8px;border-top:1px solid var(--border);">
+      <span><strong>Total</strong></span>
+      <span><strong id="cart-total">0 DA</strong></span>
+    </div>
+
+    <!-- Promo code -->
+    <div class="promo-row">
+      <input
+        id="promo-input"
+        class="promo-input"
+        type="text"
+        placeholder="Code promo (ex: CLUB54-XXXX)"
+        maxlength="20"
+      />
+      <button id="promo-apply-btn" class="promo-btn">Appliquer</button>
+    </div>
+    <div id="promo-status" class="promo-status"></div>
+
+    <!-- Order button -->
+    <button id="order-btn" class="order-btn" disabled>
+      Passer la commande →
+    </button>
+  </div>
+</aside>
+
+<!-- ══════════════════════════════════════════════════════════
+     ORDER MODAL
+══════════════════════════════════════════════════════════ -->
+<div id="order-modal" role="dialog" aria-modal="true" aria-label="Finaliser la commande">
+  <div class="modal-overlay" onclick="document.getElementById('order-modal').classList.remove('open')"></div>
+  <div class="modal-box">
+    <h2>
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-left:6px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Finaliser la commande
+    </h2>
+    <p class="sub">أدخل بياناتك وسنتصل بك لتأكيد الطلب</p>
+
+    <form id="order-form" novalidate>
+      <div class="form-group">
+        <label for="inp-name">Nom complet *</label>
+        <input id="inp-name" name="customer-name" type="text" placeholder="Votre prénom et nom" required autocomplete="name" />
+      </div>
+      <div class="form-group">
+        <label for="inp-phone">Numéro de téléphone *</label>
+        <input id="inp-phone" name="customer-phone" type="tel" placeholder="+213 6XX XXX XXX" required autocomplete="tel" />
+      </div>
+      <div class="form-group">
+        <label for="inp-address">Adresse de livraison *</label>
+        <textarea id="inp-address" name="customer-address" placeholder="Rue, quartier, ville..." required></textarea>
+      </div>
+
+      <!-- GPS Location -->
+      <div class="form-group" id="gps-group">
+        <label style="display:block;margin-bottom:5px;font-size:12px;color:var(--text-muted);letter-spacing:0.04em;direction:rtl;text-align:right;">موقعك الجغرافي</label>
+        <div style="display:flex;gap:8px;align-items:stretch;">
+          <input id="gps-input" type="text" readonly placeholder="اضغط الزر لتحديد موقعك…"
+            style="flex:1;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;padding:10px 12px;direction:rtl;text-align:right;opacity:0.75;cursor:default;outline:none;" />
+          <button type="button" id="gps-btn"
+            style="flex-shrink:0;padding:0 14px;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:var(--radius-sm);color:var(--gold);font-size:13px;font-weight:600;white-space:nowrap;transition:background 0.2s;cursor:pointer;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            تحديد موقعي
+          </button>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="modal-order-summary">
+        <!-- Filled by JS -->
+      </div>
+      <div class="modal-total">
+        <span>Total à payer</span>
+        <span class="modal-total-value gold"></span>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" onclick="document.getElementById('order-modal').classList.remove('open')">
+          Annuler
+        </button>
+        <button type="submit" class="btn-order">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          تأكيد الطلب →
+        </button>
+      </div>
+    </form>
+
+    <!-- ── شاشة نجاح الطلب (مخفية افتراضياً) ── -->
+    <div id="order-success" style="display:none">
+      <div class="order-success-icon">
+        <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="9 12 11.5 14.5 15.5 9.5"/>
+        </svg>
+      </div>
+      <h3 class="order-success-title">وصل طلبك!</h3>
+      <p class="order-success-msg">شكراً لك، <strong id="order-success-name"></strong></p>
+      <p class="order-success-sub">سيتصل بكم فريق <span class="gold">Club 54 Food</span> في أقرب وقت لتأكيد طلبكم وتحديد موعد التوصيل.</p>
+       <button class="order-success-close" onclick="closeOrderModal()">حسناً</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Floating cart (mobile) -->
+<button id="floating-cart" aria-label="Panier">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+  <span id="floating-cart-count">0</span>
+</button>
+
+<!-- Closed toast -->
+<div id="closed-toast"></div>
+
+<!-- Editorial reveal system: deliberately separate from ordering logic. -->
+<script>
+(function () {
+  var targets = [
+    '#menu', '#supplements-section', '#juice-section', '#gallery',
+    '#about', '#footer', '.menu-section-title', '.gallery-item',
+    '.sup-card', '.juice-header', '.gallery-header'
+  ];
+  function observe() {
+    var nodes = document.querySelectorAll(targets.join(','));
+    if (!('IntersectionObserver' in window)) {
+      nodes.forEach(function (node) { node.classList.add('is-visible'); });
+      return;
+    }
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: .08 });
+    nodes.forEach(function (node, index) {
+      node.classList.add('reveal');
+      node.style.transitionDelay = Math.min(index % 6, 5) * 45 + 'ms';
+      observer.observe(node);
+    });
+  }
+  document.addEventListener('DOMContentLoaded', observe);
+  window.setTimeout(observe, 900);
+})();
+</script>
+
+<!-- App JS -->
+<script src="/js/app.js"></script>
+</body>
+</html>
+

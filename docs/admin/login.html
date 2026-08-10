@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Club 54 Food — تسجيل الدخول</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --gold: #F4C430;
+      --gold-dim: rgba(244,196,48,.15);
+      --gold-border: rgba(244,196,48,.3);
+      --green-dark: #071A0F;
+      --green-mid: #0D2E1C;
+      --green-border: rgba(244,196,48,.18);
+      --text: #e8e8e8;
+      --text-dim: #888;
+      --red: #e05252;
+      --radius: 4px;
+    }
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: var(--green-dark);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .login-box {
+      background: var(--green-mid);
+      border: 1px solid var(--green-border);
+      border-radius: 12px;
+      padding: 40px 32px;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+    }
+    .login-logo {
+      height: 60px;
+      margin-bottom: 20px;
+    }
+    .login-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--gold);
+      letter-spacing: .04em;
+      margin-bottom: 6px;
+    }
+    .login-sub {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 28px;
+    }
+    label {
+      display: block;
+      text-align: right;
+      font-size: 12px;
+      color: var(--text-dim);
+      letter-spacing: .04em;
+      margin-bottom: 6px;
+    }
+    input[type="password"] {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--green-border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 15px;
+      padding: 11px 14px;
+      outline: none;
+      transition: border-color .2s;
+      direction: ltr;
+      text-align: center;
+      letter-spacing: .1em;
+      margin-bottom: 16px;
+    }
+    input[type="password"]:focus {
+      border-color: var(--gold-border);
+    }
+    .btn-login {
+      width: 100%;
+      background: var(--gold);
+      color: #071A0F;
+      border: none;
+      border-radius: var(--radius);
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 12px;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    .btn-login:hover { opacity: .88; }
+    .btn-login:disabled { opacity: .5; cursor: not-allowed; }
+    .error-msg {
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--red);
+      min-height: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <img
+      src="https://res.cloudinary.com/rjse3x88/image/upload/v1784525005/club54/logo-nobg.png"
+      alt="Club 54 Food"
+      class="login-logo"
+      onerror="this.style.display='none'"
+    />
+    <div class="login-title">CLUB 54 FOOD</div>
+    <div class="login-sub">لوحة التحكم — تسجيل الدخول</div>
+
+    <form id="login-form" onsubmit="handleLogin(event)">
+      <label for="pwd">كلمة السر</label>
+      <input type="password" id="pwd" autocomplete="current-password" autofocus placeholder="••••••••" />
+      <button type="submit" class="btn-login" id="login-btn">دخول</button>
+    </form>
+    <div class="error-msg" id="error-msg"></div>
+  </div>
+
+  <script src="../js/config.js"></script>
+  <script>
+    async function sha256(str) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const btn = document.getElementById('login-btn');
+      const err = document.getElementById('error-msg');
+      const pwd = document.getElementById('pwd').value;
+      if (!pwd) return;
+
+      btn.disabled = true;
+      btn.textContent = '...';
+      err.textContent = '';
+
+      const hash = await sha256(pwd);
+      if (hash === CONFIG.ADMIN_HASH) {
+        sessionStorage.setItem('club54-admin', '1');
+        location.href = CONFIG.BASE + '/admin/index.html';
+      } else {
+        err.textContent = 'كلمة السر غير صحيحة';
+        btn.disabled = false;
+        btn.textContent = 'دخول';
+        document.getElementById('pwd').value = '';
+      }
+    }
+
+    // Redirect if already logged in
+    if (sessionStorage.getItem('club54-admin')) {
+      location.href = CONFIG.BASE + '/admin/index.html';
+    }
+  </script>
+</body>
+</html>

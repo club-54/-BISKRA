@@ -1,0 +1,15 @@
+{
+  "name": "club54-food-v2",
+  "version": "2.0.0",
+  "description": "Club 54 Food — clean rewrite",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0"
+  }
+}

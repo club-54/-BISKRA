@@ -1,0 +1,121 @@
+{
+  "carousel": [
+    {
+      "id": "jus-ananas",
+      "name": "Jus Ananas",
+      "nameAr": "عصير أناناس",
+      "price": 400,
+      "image": "https://res.cloudinary.com/rjse3x88/image/upload/v1784662188/club54/jus-ananas.png"
+    },
+    {
+      "id": "jus-mojito-bleu",
+      "name": "Blue Mojito",
+      "nameAr": "بلو موخيطو",
+      "price": 400,
+      "image": "https://res.cloudinary.com/rjse3x88/image/upload/v1784662181/club54/jus1.png"
+    },
+    {
+      "id": "jus-mojito-rad",
+      "name": "Red Mojito",
+      "nameAr": "راد موخيطو",
+      "price": 400,
+      "image": "https://res.cloudinary.com/rjse3x88/image/upload/v1784662182/club54/jus2.png",
+      "badge": "Populaire"
+    },
+    {
+      "id": "jus-ananas-fraise",
+      "name": "Jus Tropical",
+      "nameAr": "عصير أناناس-فراولة",
+      "price": 400,
+      "image": "https://res.cloudinary.com/rjse3x88/image/upload/v1784662182/club54/jus3.png"
+    },
+    {
+      "id": "jus-banana",
+      "name": "Jus Banane",
+      "nameAr": "عصير موز",
+      "price": 300,
+      "image": "https://res.cloudinary.com/rjse3x88/image/upload/v1784662184/club54/jus4.png"
+    },
+    {
+      "id": "jus-milkshake-van",
+      "name": "Milkshake Vanille",
+      "nameAr": "ميلكشيك فانيلا",
+      "price": 450,
+      "image": "https://res.cloudinary.com/rjse3x88/image/upload/v1784662184/club54/jus5.png"
+    },
+    {
+      "id": "jus-milkshake-choc",
+      "name": "Milkshake Chocolat",
+      "nameAr": "ميلكشيك شكولاطة",
+      "price": 450,
+      "image": "https://res.cloudinary.com/rjse3x88/image/upload/v1784662185/club54/jus6.png",
+      "badge": "Best Seller"
+    },
+    {
+      "id": "jus-mojito-vert",
+      "name": "Mojito Classique",
+      "nameAr": "موخيطو كلاسيك",
+      "price": 350,
+      "image": "https://res.cloudinary.com/rjse3x88/image/upload/v1784662186/club54/jus7.png"
+    },
+    {
+      "id": "jus-mojito-menthe",
+      "name": "Mojito Menthe",
+      "nameAr": "موخيطو نعناع",
+      "price": 350,
+      "image": "https://res.cloudinary.com/rjse3x88/image/upload/v1784662187/club54/jus8.png"
+    },
+    {
+      "id": "jus-mojito-familial",
+      "name": "Mojito Familial",
+      "nameAr": "موخيطو عائلي",
+      "price": 750,
+      "image": "https://res.cloudinary.com/rjse3x88/image/upload/v1784662188/club54/jus9.png",
+      "badge": "Partagé"
+    }
+  ],
+  "simple": [
+    {
+      "id": "jus-kahwa",
+      "name": "Café",
+      "nameAr": "قهوة",
+      "price": 150
+    },
+    {
+      "id": "jus-shay",
+      "name": "Thé",
+      "nameAr": "شاي",
+      "price": 150
+    },
+    {
+      "id": "jus-eau-grande",
+      "name": "Eau Minérale Grande",
+      "nameAr": "ماء معدني كبيرة",
+      "price": 80
+    },
+    {
+      "id": "jus-eau-petite",
+      "name": "Eau Minérale Petite",
+      "nameAr": "ماء معدني صغيرة",
+      "price": 60
+    },
+    {
+      "id": "jus-soda-ala",
+      "name": "Soda Ala",
+      "nameAr": "مشروب آل",
+      "price": 150
+    },
+    {
+      "id": "jus-soda-033",
+      "name": "Soda 0.33L",
+      "nameAr": "غازي 0.33",
+      "price": 150
+    },
+    {
+      "id": "jus-canette",
+      "name": "Canette",
+      "nameAr": "كانات",
+      "price": 100
+    }
+  ]
+}
