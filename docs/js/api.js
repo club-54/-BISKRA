@@ -124,39 +124,20 @@ const API = (() => {
   }
 
   async function submitOrder({ name, phone, address, gps, cart, total, promo }) {
-    if (CONFIG.ORDER_API_URL) {
-      const response = await fetch(CONFIG.ORDER_API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, phone, address, gps, cart, total, promo }),
-      });
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok || !result.ok) {
-        throw new Error(result.error || 'Order API failed');
-      }
-      return result;
+    if (!CONFIG.ORDER_API_URL) {
+      throw new Error('خدمة الطلبات غير متاحة حالياً');
     }
 
-    // GitHub Pages is static. Keep the existing WhatsApp path until a public
-    // Replit deployment URL is configured above for the secure Telegram API.
-    const lines = [
-      '🛒 *طلب جديد — CLUB 54 FOOD*',
-      '─────────────────────',
-      ...cart.map(i =>
-        `• ${i.name}${i.size ? ` (${i.size})` : ''} ×${i.qty}  →  ${i.price * i.qty} DA`
-      ),
-      '─────────────────────',
-      promo ? `🏷 Promo (${promo.code}): −${Math.round(total * promo.discount / (100 - promo.discount))} DA` : '',
-      `💰 Total: ${total} DA`,
-      '─────────────────────',
-      `👤 ${name}`,
-      `📞 ${phone}`,
-      `📍 ${address}`,
-      gps ? `🗺 GPS: ${gps}` : '',
-    ].filter(Boolean).join('\n');
-
-    window.open(`https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent(lines)}`, '_blank');
-    return { ok: true };
+    const response = await fetch(CONFIG.ORDER_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, address, gps, cart, total, promo }),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.ok) {
+      throw new Error(result.error || 'تعذر إرسال الطلب إلى Telegram');
+    }
+    return result;
   }
 
   // Expose internals for admin-shim

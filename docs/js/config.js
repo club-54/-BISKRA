@@ -16,11 +16,8 @@ const CONFIG = (() => {
     // ─── Admin password hash (SHA-256 of "FARES54") ───────────────────────────
     ADMIN_HASH: '80aa9063dd4d673c66e8f87592698f6360765e9aec8328bb6e44a8cca8a666ed',
 
-    // ─── WhatsApp (international format without +) ────────────────────────────
-    WHATSAPP: '213656405454',
-
     // ─── Secure order API ─────────────────────────────────────────────────────
-    // Set this to the public Replit deployment URL + /api/orders.
+    // Set this to the public Replit deployment URL + /api/orders after publishing.
     // Never put TELEGRAM_BOT_TOKEN in this file or any public asset.
     ORDER_API_URL: '',
 

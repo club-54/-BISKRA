@@ -983,7 +983,7 @@ ul { list-style: none; }
   transition: var(--transition);
 }
 .btn-cancel:hover { background: rgba(255,255,255,0.09); }
-.btn-whatsapp {
+.btn-order {
   flex: 2;
   padding: 12px;
   background: #25d366;
@@ -997,7 +997,7 @@ ul { list-style: none; }
   gap: 8px;
   transition: var(--transition);
 }
-.btn-whatsapp:hover { background: #1fb855; }
+.btn-order:hover { background: var(--gold); }
 
 /* ── Order Success Screen ── */
 #order-success {

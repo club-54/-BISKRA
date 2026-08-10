@@ -4,9 +4,6 @@
 ═══════════════════════════════════════════════════════════ */
 
 // ── Config ────────────────────────────────────────────────────────────────────
-// ⚠️ Remplacer par le vrai numéro WhatsApp (format international sans +)
-const WHATSAPP_NUMBER = '213656405454';
-
 // Opening hours (Africa/Algiers timezone)
 const HOURS = {
   open:       11 * 60,  // 11:00
