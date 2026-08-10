@@ -55,5 +55,7 @@ docs/
 | `ADMIN_PASSWORD` | Yes | Plaintext password for the /admin panel |
 | `JSONBIN_MASTER_KEY` | No | JSONBin API key for cloud-synced menu overrides |
 | `JSONBIN_BIN_ID` | No | JSONBin bin ID for cloud-synced menu overrides |
+| `TELEGRAM_BOT_TOKEN` | No | Telegram bot token; leave empty to disable order delivery |
+| `TELEGRAM_CHAT_ID` | No | Telegram destination chat ID; leave empty to disable order delivery |
 
 ## User preferences

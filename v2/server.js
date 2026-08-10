@@ -20,8 +20,10 @@ const JUICES_FILE      = path.join(__dirname, 'data', 'juices.json');
 // ── Env vars ──────────────────────────────────────────────────────────────────
 const ADMIN_PASSWORD        = process.env.ADMIN_PASSWORD;
 const ADMIN_PASSWORD_BACKUP = process.env.ADMIN_PASSWORD_BACKUP;
+// Keep Telegram credentials server-side. Empty values intentionally disable
+// order delivery until the Replit Secrets are configured.
 const TELEGRAM_BOT_TOKEN    = (process.env.TELEGRAM_BOT_TOKEN || '').replace(/\s/g, '');
-const TELEGRAM_CHAT_ID      = process.env.TELEGRAM_CHAT_ID || '8453730798';
+const TELEGRAM_CHAT_ID      = (process.env.TELEGRAM_CHAT_ID || '').trim();
 const ORDER_ALLOWED_ORIGIN  = process.env.ORDER_ALLOWED_ORIGIN || '*';
 
 // Lightweight abuse protection for the public order endpoint.
