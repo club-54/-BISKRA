@@ -124,14 +124,45 @@ const API = (() => {
   }
 
   async function submitOrder({ name, phone, address, gps, cart, total, promo }) {
-    if (!CONFIG.ORDER_API_URL) {
-      throw new Error('خدمة الطلبات غير متاحة حالياً');
+    const token  = window.TELEGRAM_BOT_TOKEN || '';
+    const chatId = window.TELEGRAM_CHAT_ID || '';
+
+    if (!token || !chatId) {
+      throw new Error('خدمة الطلبات غير مهيأة حالياً');
     }
 
-    const response = await fetch(CONFIG.ORDER_API_URL, {
+    const itemsList = cart.map(item => {
+      const size = item.size ? ` (${item.size})` : '';
+      const quantity = Math.max(1, Number(item.qty) || 1);
+      return `• ${item.name}${size} ×${quantity} — ${Number(item.price) * quantity} DA`;
+    }).join('\n');
+
+    const promoLine = promo?.code
+      ? `\n🏷 *Promo:* ${promo.code} (−${promo.savedAmount || 0} DA)`
+      : '';
+    const text = [
+      '🚨 *طلب جديد — CLUB 54 FOOD*',
+      '',
+      `👤 *الاسم:* ${name}`,
+      `📞 *الهاتف:* ${phone}`,
+      `📍 *العنوان:* ${address}`,
+      gps ? `🗺 *الموقع:* ${gps}` : '',
+      '',
+      '*الطلب:*',
+      itemsList,
+      promoLine,
+      '',
+      `💰 *المجموع:* ${total} DA`,
+    ].filter(Boolean).join('\n');
+
+    const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, phone, address, gps, cart, total, promo }),
+      body: JSON.stringify({
+        chat_id: chatId,
+        text,
+        parse_mode: 'Markdown',
+      }),
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok || !result.ok) {
