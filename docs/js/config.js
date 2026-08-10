@@ -19,6 +19,11 @@ const CONFIG = (() => {
     // ─── WhatsApp (international format without +) ────────────────────────────
     WHATSAPP: '213656405454',
 
+    // ─── Secure order API ─────────────────────────────────────────────────────
+    // Set this to the public Replit deployment URL + /api/orders.
+    // Never put TELEGRAM_BOT_TOKEN in this file or any public asset.
+    ORDER_API_URL: '',
+
     // ─── Base URL (auto-detected, don't change) ───────────────────────────────
     BASE: base,
   };

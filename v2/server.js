@@ -20,9 +20,24 @@ const JUICES_FILE      = path.join(__dirname, 'data', 'juices.json');
 // ── Env vars ──────────────────────────────────────────────────────────────────
 const ADMIN_PASSWORD        = process.env.ADMIN_PASSWORD;
 const ADMIN_PASSWORD_BACKUP = process.env.ADMIN_PASSWORD_BACKUP;
+const TELEGRAM_BOT_TOKEN    = (process.env.TELEGRAM_BOT_TOKEN || '').replace(/\s/g, '');
+const TELEGRAM_CHAT_ID      = process.env.TELEGRAM_CHAT_ID || '8453730798';
+const ORDER_ALLOWED_ORIGIN  = process.env.ORDER_ALLOWED_ORIGIN || '*';
+
+// Lightweight abuse protection for the public order endpoint.
+const orderAttempts = new Map();
+const ORDER_WINDOW_MS = 60 * 1000;
+const ORDER_LIMIT = 8;
 
 // ── Middleware ────────────────────────────────────────────────────────────────
 app.use(express.json());
+app.use('/api/orders', (req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', ORDER_ALLOWED_ORIGIN);
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
 app.use(session({
   secret: process.env.SESSION_SECRET || 'club54-dev-secret-change-in-prod',
   resave: false,
@@ -86,6 +101,86 @@ function readOverrides() {
 }
 
 function writeOverrides(data) { writeJSON(OVERRIDES_FILE, data); }
+
+function cleanOrderText(value, maxLength) {
+  return String(value ?? '').trim().replace(/\s+/g, ' ').slice(0, maxLength);
+}
+
+function orderRateLimit(req, res, next) {
+  const now = Date.now();
+  const key = req.ip || req.socket.remoteAddress || 'unknown';
+  const recent = (orderAttempts.get(key) || []).filter(t => now - t < ORDER_WINDOW_MS);
+  if (recent.length >= ORDER_LIMIT) {
+    return res.status(429).json({ error: 'عدد الطلبات كبير، حاول بعد قليل' });
+  }
+  recent.push(now);
+  orderAttempts.set(key, recent);
+  next();
+}
+
+function buildTelegramOrderMessage(order) {
+  const name = cleanOrderText(order.name, 80);
+  const phone = cleanOrderText(order.phone, 40);
+  const address = cleanOrderText(order.address, 180);
+  const gps = cleanOrderText(order.gps, 160);
+  const items = Array.isArray(order.cart) ? order.cart.slice(0, 40) : [];
+  const lines = [
+    '🛒 طلب جديد — CLUB 54 FOOD',
+    '─────────────────────',
+    ...items.map(item => {
+      const itemName = cleanOrderText(item.name, 100);
+      const size = cleanOrderText(item.size, 40);
+      const qty = Math.max(1, Math.min(99, Number.parseInt(item.qty, 10) || 1));
+      const price = Math.max(0, Number(item.price) || 0);
+      return `• ${itemName}${size ? ` (${size})` : ''} ×${qty} → ${price * qty} DA`;
+    }),
+    '─────────────────────',
+    order.promo?.code ? `🏷 Promo: ${cleanOrderText(order.promo.code, 40)} (−${Math.max(0, Number(order.promo.savedAmount) || 0)} DA)` : '',
+    `💰 Total: ${Math.max(0, Number(order.total) || 0)} DA`,
+    '─────────────────────',
+    `👤 ${name}`,
+    `📞 ${phone}`,
+    `📍 ${address}`,
+    gps ? `🗺 GPS: ${gps}` : '',
+  ].filter(Boolean);
+  return lines.join('\n');
+}
+
+// Public order endpoint. The Telegram token stays server-side in Replit Secrets.
+app.post('/api/orders', orderRateLimit, async (req, res) => {
+  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+    return res.status(503).json({ error: 'خدمة الطلبات غير مهيأة حالياً' });
+  }
+
+  const { name, phone, address, cart, total } = req.body || {};
+  if (!cleanOrderText(name, 80) || !cleanOrderText(phone, 40)
+      || !cleanOrderText(address, 180) || !Array.isArray(cart) || !cart.length) {
+    return res.status(400).json({ error: 'بيانات الطلب غير مكتملة' });
+  }
+
+  try {
+    const telegramResponse = await fetch(
+      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: buildTelegramOrderMessage(req.body),
+        }),
+      }
+    );
+    const result = await telegramResponse.json().catch(() => ({}));
+    if (!telegramResponse.ok || !result.ok) {
+      console.error('[Telegram] sendMessage failed with status', telegramResponse.status);
+      return res.status(502).json({ error: 'تعذر إرسال الطلب إلى Telegram' });
+    }
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('[Telegram] request failed:', error.message);
+    res.status(502).json({ error: 'تعذر الاتصال بخدمة Telegram' });
+  }
+});
 
 // In-memory override cache (cleared on write)
 let _cache = null;
@@ -397,55 +492,6 @@ app.post('/api/promos/redeem', (req, res) => {
     autoRenewIfExhausted(promos);
     res.json({ ok: true, discount: promos[idx].discount });
   } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// ── Orders → Telegram ────────────────────────────────────────────────────────
-
-app.post('/api/order', async (req, res) => {
-  try {
-    const { name, phone, address, gps, cart, total, promo } = req.body;
-    if (!name || !phone || !address || !cart?.length) {
-      return res.status(400).json({ ok: false, error: 'Données manquantes' });
-    }
-
-    const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-    const CHAT_ID   = process.env.TELEGRAM_CHAT_ID;
-    if (!BOT_TOKEN || !CHAT_ID) {
-      return res.status(500).json({ ok: false, error: 'Telegram non configuré' });
-    }
-
-    const lines = [
-      '🛒 *طلب جديد — CLUB 54 FOOD*',
-      '─────────────────────',
-      ...cart.map(i =>
-        `• ${i.name}${i.size ? ` (${i.size})` : ''} ×${i.qty}  →  *${i.price * i.qty} DA*`
-      ),
-      '─────────────────────',
-      promo ? `🏷 Promo (${promo.code}): −${Math.round(promo.savedAmount)} DA` : '',
-      `💰 *Total: ${total} DA*`,
-      '─────────────────────',
-      `👤 ${name}`,
-      `📞 ${phone}`,
-      `📍 ${address}`,
-      gps ? `🗺 GPS: ${gps}` : '',
-    ].filter(Boolean).join('\n');
-
-    const tgRes = await fetch(
-      `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
-      {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ chat_id: CHAT_ID, text: lines, parse_mode: 'Markdown' }),
-      }
-    );
-    const tgJson = await tgRes.json();
-    if (!tgJson.ok) throw new Error(tgJson.description || 'Telegram error');
-
-    res.json({ ok: true });
-  } catch (e) {
-    console.error('[order]', e.message);
-    res.status(500).json({ ok: false, error: e.message });
-  }
 });
 
 // ── Gallery API ───────────────────────────────────────────────────────────────

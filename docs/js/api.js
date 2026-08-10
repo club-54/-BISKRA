@@ -124,6 +124,21 @@ const API = (() => {
   }
 
   async function submitOrder({ name, phone, address, gps, cart, total, promo }) {
+    if (CONFIG.ORDER_API_URL) {
+      const response = await fetch(CONFIG.ORDER_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, phone, address, gps, cart, total, promo }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || 'Order API failed');
+      }
+      return result;
+    }
+
+    // GitHub Pages is static. Keep the existing WhatsApp path until a public
+    // Replit deployment URL is configured above for the secure Telegram API.
     const lines = [
       '🛒 *طلب جديد — CLUB 54 FOOD*',
       '─────────────────────',
