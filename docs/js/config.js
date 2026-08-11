@@ -10,8 +10,8 @@ const CONFIG = (() => {
   return {
     // ─── JSONBin credentials ───────────────────────────────────────────────────
     // The static GitHub Pages admin uses separate Bins for each data group.
-    // Never put the JSONBin master key in this public GitHub Pages file.
-    JSONBIN_KEY: '',
+    // Direct GitHub Pages mode: this key is public by design.
+    JSONBIN_KEY: '$2a$10$AaIcxgoVpir/nhppc67aOu0hUJazAnxa5Yu4JSNQuFsqDSZsx2DSK',
     JSONBIN_BINS: {
       menu:        '6a60762fda38895dfe7e48fd',
       supplements: '6a60762ff5f4af5e29afc502',
