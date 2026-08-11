@@ -9,9 +9,15 @@ const CONFIG = (() => {
 
   return {
     // ─── JSONBin credentials ───────────────────────────────────────────────────
-    // سجّل في https://jsonbin.io واحصل على مفتاحك
-    JSONBIN_KEY:    '',   // ← X-Master-Key مثال: $2a$10$...
-    JSONBIN_BIN_ID: '',   // ← Bin ID  مثال: 6812abc123...
+    // The static GitHub Pages admin uses separate Bins for each data group.
+    // Direct GitHub Pages mode: this key is public by design.
+    JSONBIN_KEY: '$2a$10$AaIcxgoVpir/nhppc67aOu0hUJazAnxa5Yu4JSNQuFsqDSZsx2DSK',
+    JSONBIN_BINS: {
+      menu:        '6a60762fda38895dfe7e48fd',
+      supplements: '6a60762ff5f4af5e29afc502',
+      promos:      '6a60762fda38895dfe7e48fc',
+      overrides:   '6a5e4d70f5f4af5e29a88fe1',
+    },
 
     // ─── Admin password hash (SHA-256 of "FARES54") ───────────────────────────
     ADMIN_HASH: '80aa9063dd4d673c66e8f87592698f6360765e9aec8328bb6e44a8cca8a666ed',

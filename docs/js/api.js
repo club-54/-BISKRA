@@ -2,54 +2,156 @@
    يُستخدم من الصفحة الرئيسية (app.js) وصفحة الأدمن
 ─────────────────────────────────────────────────────────────────────────────── */
 const API = (() => {
-  let _cache   = null;
+  let _cache = null;
   let _cacheTs = 0;
-  const TTL    = 2 * 60 * 1000; // 2 min cache
+  const TTL = 2 * 60 * 1000; // 2 min cache
+  const EMPTY_OVERRIDES = { items: {}, newItems: [], deletedIds: [], customCategories: [] };
+  const EMPTY_JUICES = { carousel: [], simple: [] };
 
-  // ── Internal: fetch full JSONBin record ───────────────────────────────────
-  async function _get(force = false) {
-    if (!CONFIG.JSONBIN_KEY || !CONFIG.JSONBIN_BIN_ID) return null;
-    const now = Date.now();
-    if (!force && _cache && (now - _cacheTs) < TTL) return _cache;
-    try {
-      const r = await fetch(
-        `https://api.jsonbin.io/v3/b/${CONFIG.JSONBIN_BIN_ID}/latest`,
-        { headers: { 'X-Master-Key': CONFIG.JSONBIN_KEY } }
-      );
-      if (!r.ok) return null;
-      _cache   = (await r.json()).record;
-      _cacheTs = Date.now();
-      return _cache;
-    } catch { return null; }
+  function isConfigured() {
+    return Boolean(CONFIG.JSONBIN_KEY && CONFIG.JSONBIN_BINS
+      && Object.values(CONFIG.JSONBIN_BINS).every(Boolean));
   }
 
-  // ── Internal: save full record to JSONBin ─────────────────────────────────
-  async function _save(data) {
-    _cache   = data;
-    _cacheTs = Date.now();
-    await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.JSONBIN_BIN_ID}`, {
-      method:  'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-Master-Key': CONFIG.JSONBIN_KEY },
-      body:    JSON.stringify(data),
+  function normalizeOverrides(record) {
+    if (!record || typeof record !== 'object' || Array.isArray(record)) {
+      return { ...EMPTY_OVERRIDES };
+    }
+    const value = record.overrides && typeof record.overrides === 'object'
+      ? record.overrides
+      : record;
+    return {
+      ...EMPTY_OVERRIDES,
+      ...value,
+      items: { ...(value.items || {}) },
+      newItems: Array.isArray(value.newItems) ? value.newItems : [],
+      deletedIds: Array.isArray(value.deletedIds) ? value.deletedIds : [],
+      customCategories: Array.isArray(value.customCategories) ? value.customCategories : [],
+    };
+  }
+
+  function normalizeJuices(value) {
+    return {
+      carousel: Array.isArray(value?.carousel) ? value.carousel : [],
+      simple: Array.isArray(value?.simple) ? value.simple : [],
+    };
+  }
+
+  function normalizeList(record, key) {
+    if (Array.isArray(record)) return record;
+    return Array.isArray(record?.[key]) ? record[key] : [];
+  }
+
+  // ── JSONBin storage: one Bin per data group ────────────────────────────────
+  async function _getBin(name, force = false) {
+    if (!isConfigured()) return null;
+    const now = Date.now();
+    const cached = _cache?.bins?.[name];
+    if (!force && cached && now - cached.ts < TTL) return cached.record;
+
+    const binId = CONFIG.JSONBIN_BINS[name];
+    const response = await fetch(
+      `https://api.jsonbin.io/v3/b/${binId}/latest`,
+      { headers: { 'X-Master-Key': CONFIG.JSONBIN_KEY } }
+    );
+    if (!response.ok) {
+      throw new Error(`JSONBin read failed (${name}: ${response.status})`);
+    }
+    const record = (await response.json()).record;
+    _cache ??= { bins: {} };
+    _cache.bins[name] = { record, ts: Date.now() };
+    return record;
+  }
+
+  async function _saveBin(name, data) {
+    if (!isConfigured()) throw new Error('JSONBin غير مهيأ');
+    const binId = CONFIG.JSONBIN_BINS[name];
+    const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': CONFIG.JSONBIN_KEY,
+      },
+      body: JSON.stringify(data),
     });
+    if (!response.ok) {
+      throw new Error(`JSONBin save failed (${name}: ${response.status})`);
+    }
+    _cache ??= { bins: {} };
+    _cache.bins[name] = { record: data, ts: Date.now() };
+  }
+
+  // Reads the four bins into the shape used by the admin shim.
+  async function _get(force = false) {
+    if (!isConfigured()) return null;
+    if (!force && _cache?.state && Date.now() - _cache.stateTs < TTL) return _cache.state;
+
+    const [overrideRecord, supplementRecord, promoRecord] = await Promise.all([
+      _getBin('overrides', force),
+      _getBin('supplements', force),
+      _getBin('promos', force),
+    ]);
+    const state = {
+      overrides: normalizeOverrides(overrideRecord),
+      supplements: normalizeList(supplementRecord, 'supplements'),
+      juices: normalizeJuices(overrideRecord?.juices),
+      promos: normalizeList(promoRecord, 'promos'),
+      gallery: Array.isArray(overrideRecord?.gallery) ? overrideRecord.gallery : [],
+    };
+    _cache ??= { bins: {} };
+    _cache.state = state;
+    _cache.stateTs = Date.now();
+    return state;
+  }
+
+  // Saves every changed data group to its dedicated Bin.
+  async function _save(data) {
+    const state = {
+      overrides: normalizeOverrides(data?.overrides),
+      supplements: Array.isArray(data?.supplements) ? data.supplements : [],
+      juices: normalizeJuices(data?.juices),
+      promos: Array.isArray(data?.promos) ? data.promos : [],
+      gallery: Array.isArray(data?.gallery) ? data.gallery : [],
+    };
+    await Promise.all([
+      _saveBin('overrides', {
+        overrides: state.overrides,
+        juices: state.juices,
+        gallery: state.gallery,
+      }),
+      _saveBin('supplements', state.supplements),
+      _saveBin('promos', state.promos),
+    ]);
+    _cache ??= { bins: {} };
+    _cache.state = state;
+    _cache.stateTs = Date.now();
   }
 
   // ── Internal: ensure data has the right shape ─────────────────────────────
   function _defaults(d) {
     return {
-      overrides:   d?.overrides   ?? { items: {}, newItems: [], deletedIds: [], customCategories: [] },
-      supplements: d?.supplements ?? [],
-      juices:      d?.juices      ?? { carousel: [], simple: [] },
-      promos:      d?.promos      ?? [],
-      gallery:     d?.gallery     ?? [],
+      overrides: normalizeOverrides(d?.overrides),
+      supplements: Array.isArray(d?.supplements) ? d.supplements : [],
+      juices: normalizeJuices(d?.juices),
+      promos: Array.isArray(d?.promos) ? d.promos : [],
+      gallery: Array.isArray(d?.gallery) ? d.gallery : [],
     };
   }
 
   // ── Public menu (base + overrides) ────────────────────────────────────────
   async function getMenu() {
-    const base = await fetch(CONFIG.BASE + '/data/menu.json').then(r => r.json());
-    const raw  = await _get();
-    const ov   = (raw ? _defaults(raw) : _defaults(null)).overrides;
+    let base;
+    try {
+      const remote = await _getBin('menu');
+      base = remote?.categories && remote?.items ? remote : null;
+    } catch (error) {
+      console.warn('[JSONBin] menu fallback:', error.message);
+    }
+    if (!base) {
+      base = await fetch(CONFIG.BASE + '/data/menu.json').then(r => r.json());
+    }
+    const raw = await _get();
+    const ov = (raw ? _defaults(raw) : _defaults(null)).overrides;
 
     const merged = base.items
       .filter(i  => !(ov.deletedIds || []).includes(i.id))
@@ -62,13 +164,22 @@ const API = (() => {
   }
 
   async function getBaseMenu() {
+    try {
+      const remote = await _getBin('menu');
+      if (remote?.categories && remote?.items) return remote;
+    } catch (error) {
+      console.warn('[JSONBin] base menu fallback:', error.message);
+    }
     return fetch(CONFIG.BASE + '/data/menu.json').then(r => r.json());
   }
 
   async function getSupplements() {
-    const raw = await _get();
-    const d   = _defaults(raw);
-    if (d.supplements.length) return d.supplements;
+    try {
+      const record = await _getBin('supplements');
+      if (record !== null) return normalizeList(record, 'supplements');
+    } catch (error) {
+      console.warn('[JSONBin] supplements fallback:', error.message);
+    }
     return fetch(CONFIG.BASE + '/data/supplements.json').then(r => r.json()).catch(() => []);
   }
 
@@ -90,9 +201,12 @@ const API = (() => {
 
   // ── Promos: JSONBin first, static fallback ────────────────────────────────
   async function getPromos() {
-    const raw = await _get();
-    const d   = _defaults(raw);
-    if (d.promos.length) return d.promos;
+    try {
+      const record = await _getBin('promos');
+      if (record !== null) return normalizeList(record, 'promos');
+    } catch (error) {
+      console.warn('[JSONBin] promos fallback:', error.message);
+    }
     return fetch(CONFIG.BASE + '/data/promo-codes.json').then(r => r.json()).catch(() => []);
   }
 
@@ -105,20 +219,18 @@ const API = (() => {
   }
 
   async function redeemPromo(code) {
-    const raw    = await _get(true); // fresh
-    const d      = _defaults(raw);
-    // If JSONBin not configured, use static file but can't persist
-    const promos = d.promos.length ? d.promos
+    const raw = await _get(true);
+    const d = _defaults(raw);
+    const promos = d.promos.length
+      ? d.promos
       : await fetch(CONFIG.BASE + '/data/promo-codes.json').then(r => r.json()).catch(() => []);
     const idx = promos.findIndex(p => p.code === code);
     if (idx === -1 || promos[idx].used) return { ok: false };
     const discount = promos[idx].discount;
-    // Only persist if JSONBin is configured
-    if (CONFIG.JSONBIN_KEY && CONFIG.JSONBIN_BIN_ID) {
+    if (isConfigured()) {
       promos[idx].used   = true;
       promos[idx].usedAt = new Date().toISOString();
-      const full = { ...(raw || {}), ...d, promos };
-      await _save(full);
+      await _save({ ...(raw || {}), ...d, promos });
     }
     return { ok: true, discount };
   }
