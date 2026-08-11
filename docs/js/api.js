@@ -113,12 +113,21 @@ const API = (() => {
       promos: Array.isArray(data?.promos) ? data.promos : [],
       gallery: Array.isArray(data?.gallery) ? data.gallery : [],
     };
+    const currentOverrides = _cache?.bins?.overrides?.record;
+    const hasNestedOverrides = currentOverrides
+      && typeof currentOverrides === 'object'
+      && !Array.isArray(currentOverrides)
+      && Object.prototype.hasOwnProperty.call(currentOverrides, 'overrides');
+    const overridesPayload = {
+      ...(currentOverrides && typeof currentOverrides === 'object' && !Array.isArray(currentOverrides)
+        ? currentOverrides
+        : {}),
+      ...(hasNestedOverrides ? { overrides: state.overrides } : state.overrides),
+      juices: state.juices,
+      gallery: state.gallery,
+    };
     await Promise.all([
-      _saveBin('overrides', {
-        overrides: state.overrides,
-        juices: state.juices,
-        gallery: state.gallery,
-      }),
+      _saveBin('overrides', overridesPayload),
       _saveBin('supplements', state.supplements),
       _saveBin('promos', state.promos),
     ]);
