@@ -23,6 +23,7 @@
   --shadow:       0 4px 24px rgba(0,0,0,0.5);
   --transition:   0.2s ease;
   --font-main:    'Inter', 'Cairo', system-ui, sans-serif;
+  --font-hero:    'Bodoni Moda', Georgia, serif;
 }
 
 /* ── Reset ────────────────────────────────────────────────── */
@@ -245,11 +246,28 @@ ul { list-style: none; }
   margin-bottom: 8px;
 }
 .hero-heading {
-  font-size: clamp(2.4rem, 5vw, 4.5rem);
-  line-height: .95;
-  font-weight: 800;
-  letter-spacing: -.045em;
-  text-transform: uppercase;
+  position: relative;
+  max-width: 8.5ch;
+  font-family: var(--font-hero);
+  font-size: clamp(3.25rem, 7vw, 6.4rem);
+  font-optical-sizing: auto;
+  font-style: italic;
+  font-weight: 700;
+  line-height: .84;
+  letter-spacing: -.075em;
+  color: #f8f1d8;
+  text-wrap: balance;
+  text-shadow: 2px 3px 0 rgba(5, 15, 5, .72);
+  text-transform: none;
+}
+.hero-heading::after {
+  content: "";
+  display: block;
+  width: 2.2em;
+  height: 1px;
+  margin-top: .5em;
+  background: linear-gradient(90deg, var(--gold), rgba(244,196,48,0));
+  opacity: .82;
 }
 .hero-heading em { color: var(--gold); font-style: normal; }
 .hero-sub {
@@ -374,7 +392,7 @@ ul { list-style: none; }
   .hero-lockup { gap: 9px; }
   .hero-lockup-word { font-size: 10px; letter-spacing: .25em; }
   .hero-title { font-size: clamp(6rem, 30vw, 9rem); }
-  .hero-heading { font-size: clamp(2.25rem, 11vw, 3.4rem); }
+  .hero-heading { max-width: 9ch; font-size: clamp(2.85rem, 12vw, 4.2rem); }
   .hero-actions { width: 100%; gap: 8px; }
   .hero-cta { padding: 15px 14px; font-size: 12px; }
   .hero-mark { right: -4vw; top: 11vh; bottom: auto; font-size: 12rem; opacity: .4; }
@@ -2013,7 +2031,7 @@ body::before {
   text-shadow: 10px 14px 0 rgba(5,15,5,.62);
   filter: drop-shadow(0 0 46px rgba(244,196,48,.34));
 }
-.hero-heading { font-size: clamp(3rem, 6.2vw, 6rem); letter-spacing: -.07em; }
+.hero-heading { max-width: 8.5ch; font-size: clamp(3.25rem, 7vw, 6.4rem); }
 .hero-sub { color: rgba(247,244,232,.66); }
 .hero-cta { padding: 17px 24px; text-transform: uppercase; font-size: 11px; letter-spacing: .12em; }
 .hero-cta-primary { box-shadow: 8px 8px 0 rgba(244,196,48,.13), 0 12px 35px rgba(244,196,48,.22); }
