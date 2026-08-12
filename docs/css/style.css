@@ -2031,7 +2031,17 @@ body::before {
   text-shadow: 10px 14px 0 rgba(5,15,5,.62);
   filter: drop-shadow(0 0 46px rgba(244,196,48,.34));
 }
-.hero-heading { max-width: 8.5ch; font-size: clamp(3.25rem, 7vw, 6.4rem); }
+.hero-heading {
+  max-width: 8.5ch;
+  font-family: var(--font-hero);
+  font-size: clamp(3.25rem, 7vw, 6.4rem);
+  font-style: italic;
+  font-weight: 700;
+  line-height: .84;
+  letter-spacing: -.075em;
+  color: #f8f1d8;
+  text-transform: none;
+}
 .hero-sub { color: rgba(247,244,232,.66); }
 .hero-cta { padding: 17px 24px; text-transform: uppercase; font-size: 11px; letter-spacing: .12em; }
 .hero-cta-primary { box-shadow: 8px 8px 0 rgba(244,196,48,.13), 0 12px 35px rgba(244,196,48,.22); }
