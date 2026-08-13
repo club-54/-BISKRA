@@ -2226,6 +2226,7 @@ body::before {
   color: rgba(255,255,255,.45);
   text-decoration: none;
   font-weight: 600;
+  text-transform: lowercase;
   transition: color .2s;
 }
 .footer-dev-name:hover { color: var(--gold); }
