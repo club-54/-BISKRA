@@ -552,13 +552,13 @@
         <input id="inp-phone" name="customer-phone" type="tel" placeholder="+213 6XX XXX XXX" required autocomplete="tel" />
       </div>
       <div class="form-group">
-        <label for="inp-address">Adresse de livraison *</label>
-        <textarea id="inp-address" name="customer-address" placeholder="Rue, quartier, ville..." required></textarea>
+        <label for="inp-address">Adresse de livraison <span class="optional-field">(optionnel)</span></label>
+        <textarea id="inp-address" name="customer-address" placeholder="Rue, quartier, ville... (optionnel)"></textarea>
       </div>
 
       <!-- GPS Location -->
       <div class="form-group" id="gps-group">
-        <label style="display:block;margin-bottom:5px;font-size:12px;color:var(--text-muted);letter-spacing:0.04em;direction:rtl;text-align:right;">موقعك الجغرافي</label>
+        <label style="display:block;margin-bottom:5px;font-size:12px;color:var(--text-muted);letter-spacing:0.04em;direction:rtl;text-align:right;">موقعك الجغرافي <span class="optional-field">(اختياري)</span></label>
         <div style="display:flex;gap:8px;align-items:stretch;">
           <input id="gps-input" type="text" readonly placeholder="اضغط الزر لتحديد موقعك…"
             style="flex:1;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;padding:10px 12px;direction:rtl;text-align:right;opacity:0.75;cursor:default;outline:none;" />
@@ -568,6 +568,11 @@
             تحديد موقعي
           </button>
         </div>
+      </div>
+
+      <div class="form-group">
+        <label for="inp-note">ملاحظة <span class="optional-field">(اختياري)</span></label>
+        <textarea id="inp-note" name="customer-note" placeholder="اكتب أي ملاحظة خاصة بطلبك..."></textarea>
       </div>
 
       <!-- Summary -->

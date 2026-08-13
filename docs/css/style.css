@@ -938,6 +938,12 @@ ul { list-style: none; }
   margin-bottom: 5px;
   letter-spacing: 0.04em;
 }
+.optional-field {
+  color: var(--text-dim);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
 .form-group input,
 .form-group textarea {
   width: 100%;

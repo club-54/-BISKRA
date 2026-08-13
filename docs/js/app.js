@@ -550,8 +550,9 @@ async function submitOrder(form, total) {
   const phone   = form.querySelector('[name="customer-phone"]').value.trim();
   const address = form.querySelector('[name="customer-address"]').value.trim();
   const gps     = document.getElementById('gps-input')?.value?.trim() || '';
+  const note    = form.querySelector('[name="customer-note"]')?.value.trim() || '';
 
-  if (!name || !phone || !address) return;
+  if (!name || !phone) return;
 
   // Disable submit button while sending
   const submitBtn = form.querySelector('[type="submit"]');
@@ -563,7 +564,7 @@ async function submitOrder(form, total) {
 
   try {
     const json = await API.submitOrder({
-      name, phone, address, gps, total,
+      name, phone, address, gps, note, total,
       cart:  state.cart.map(i => ({ name: i.name, size: i.size || null, qty: i.qty, price: i.price })),
       promo: state.promo ? { code: state.promo.code, discount: state.promo.discount, savedAmount } : null,
     });

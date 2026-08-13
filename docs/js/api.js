@@ -244,7 +244,7 @@ const API = (() => {
     return { ok: true, discount };
   }
 
-  async function submitOrder({ name, phone, address, gps, cart, total, promo }) {
+  async function submitOrder({ name, phone, address, gps, note, cart, total, promo }) {
     const token  = window.TELEGRAM_BOT_TOKEN || '';
     const chatId = window.TELEGRAM_CHAT_ID || '';
 
@@ -266,8 +266,9 @@ const API = (() => {
       '',
       `👤 *الاسم:* ${name}`,
       `📞 *الهاتف:* ${phone}`,
-      `📍 *العنوان:* ${address}`,
+      address ? `📍 *العنوان:* ${address}` : '',
       gps ? `🗺 *الموقع:* ${gps}` : '',
+      note ? `📝 *ملاحظة:* ${note}` : '',
       '',
       '*الطلب:*',
       itemsList,

@@ -125,6 +125,7 @@ function buildTelegramOrderMessage(order) {
   const phone = cleanOrderText(order.phone, 40);
   const address = cleanOrderText(order.address, 180);
   const gps = cleanOrderText(order.gps, 160);
+  const note = cleanOrderText(order.note, 300);
   const items = Array.isArray(order.cart) ? order.cart.slice(0, 40) : [];
   const lines = [
     '🛒 طلب جديد — CLUB 54 FOOD',
@@ -142,8 +143,9 @@ function buildTelegramOrderMessage(order) {
     '─────────────────────',
     `👤 ${name}`,
     `📞 ${phone}`,
-    `📍 ${address}`,
+    address ? `📍 ${address}` : '',
     gps ? `🗺 GPS: ${gps}` : '',
+    note ? `📝 ملاحظة: ${note}` : '',
   ].filter(Boolean);
   return lines.join('\n');
 }
@@ -154,9 +156,9 @@ app.post('/api/orders', orderRateLimit, async (req, res) => {
     return res.status(503).json({ error: 'خدمة الطلبات غير مهيأة حالياً' });
   }
 
-  const { name, phone, address, cart, total } = req.body || {};
+  const { name, phone, cart, total } = req.body || {};
   if (!cleanOrderText(name, 80) || !cleanOrderText(phone, 40)
-      || !cleanOrderText(address, 180) || !Array.isArray(cart) || !cart.length) {
+      || !Array.isArray(cart) || !cart.length) {
     return res.status(400).json({ error: 'بيانات الطلب غير مكتملة' });
   }
 
