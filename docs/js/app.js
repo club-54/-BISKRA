@@ -75,7 +75,7 @@ function initHeroVideo() {
   video.className = 'hero-video';
 
   const src = document.createElement('source');
-  src.src  = 'https://res.cloudinary.com/rjse3x88/video/upload/v1784525009/club54/hero-video.mp4';
+  src.src  = 'https://res.cloudinary.com/rjse3x88/video/upload/redpandacompress_0721_1_bept3s.mp4';
   src.type = 'video/mp4';
   video.appendChild(src);
 
